@@ -41,13 +41,16 @@ if [ "$ENV_PLATFORM" == "aws" ]; then
 fi
 
 #=====> AGENT RUN COMMAND <=====#
+docker pull "${DOCKER_IMAGE}"
+
 if [[ $(docker ps -a --filter="name=${POD_NAME}" --filter "status=exited" | grep -w "${POD_NAME}") ]]; then
 #  docker start -a "${POD_NAME}"
   echo "Fusion Agent should be starting automatically"
+  docker restart "${POD_NAME}"
 elif [[ $(docker ps -a --filter="name=${POD_NAME}" --filter "status=running" | grep -w "${POD_NAME}") ]]; then
   echo "Fusion Agent running"
+  docker restart "${POD_NAME}"
 else
-  docker pull "${DOCKER_IMAGE}"
   docker create -m ${MEMORY_ALLOCATION} -v /var/run/docker.sock:/var/run/docker.sock -e ENV_NODE_NAME="${ENV_NODE_NAME}" -e ENV_NODE_UNIQUE_ID="${ENV_NODE_UNIQUE_ID}" -e ENV_NODE_DESCRIPTION="${ENV_NODE_DESCRIPTION}" -e ENV_NODE_AUTHORIZATION_TOKEN="${ENV_NODE_AUTHORIZATION_TOKEN}" -e ENV_PLATFORM="${ENV_PLATFORM}" -e ENV_NODE_HOSTNAME="${ENV_NODE_HOSTNAME}" -p ${PORT}:${PORT} --name ${POD_NAME} --restart "${RESTART_POLICY}" ${DOCKER_IMAGE}
   docker start -a "${POD_NAME}"
 fi
