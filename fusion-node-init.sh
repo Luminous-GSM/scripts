@@ -42,8 +42,8 @@ fi
 
 #=====> AGENT RUN COMMAND <=====#
 docker pull "${DOCKER_IMAGE}"
-docker stop "${DOCKER_IMAGE}"
-docker rm "${DOCKER_IMAGE}"
+docker stop "${POD_NAME}"
+docker rm "${POD_NAME}"
 docker create -m ${MEMORY_ALLOCATION} -v /var/run/docker.sock:/var/run/docker.sock -e ENV_NODE_NAME="${ENV_NODE_NAME}" -e ENV_NODE_UNIQUE_ID="${ENV_NODE_UNIQUE_ID}" -e ENV_NODE_DESCRIPTION="${ENV_NODE_DESCRIPTION}" -e ENV_NODE_AUTHORIZATION_TOKEN="${ENV_NODE_AUTHORIZATION_TOKEN}" -e ENV_PLATFORM="${ENV_PLATFORM}" -e ENV_NODE_HOSTNAME="${ENV_NODE_HOSTNAME}" -p ${PORT}:${PORT} --name ${POD_NAME} --restart "${RESTART_POLICY}" ${DOCKER_IMAGE}
 docker start -a "${POD_NAME}"
 
