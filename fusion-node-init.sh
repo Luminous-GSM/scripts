@@ -25,7 +25,7 @@ ENV_PLATFORM=${paramters[4]}
 ENV_NODE_HOSTNAME=${paramters[5]}
 
 if [ "$ENV_PLATFORM" == "aws" ]; then
-  ENV_NODE_HOSTNAME="$(ec2-metadata --public-hostname)"
+  ENV_NODE_HOSTNAME="$(ec2-metadata --local-hostname | cut -d " " -f 2)"
 fi
 
 #=====> AGENT RUN COMMAND <=====#
