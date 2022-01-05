@@ -12,7 +12,7 @@ chmod 666 /var/run/docker.sock
 #=====> CONSTANTS <=====#
 PORT=7878
 POD_NAME="fusion-agent"
-DOCKER_IMAGE="ghcr.io/luminous-gsm/fusion:latest"
+DOCKER_IMAGE="ghcr.io/luminous-gsm/fusion:0.0.1-SNAPSHOT"
 MEMORY_ALLOCATION="128m"
 
 #=====> VARIABLES <=====#
