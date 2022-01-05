@@ -10,10 +10,10 @@ usermod -a -G docker ec2-user
 chmod 666 /var/run/docker.sock
 
 # Replace the ExecStart with the one below
-SEARCH_STRING="/^ExecStart=/"
+SEARCH_STRING=".*ExecStart=/usr/bin/dockerd.*"
 REPLACE_STRING="ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock"
 FILE_DIRECTORY="/usr/lib/systemd/system/docker.service"
-sed -i "s@${SEARCH_STRING}@${REPLACE_STRING}@" ${FILE_DIRECTORY}
+sed -i "s,${SEARCH_STRING},${REPLACE_STRING}," ${FILE_DIRECTORY}
 
 systemctl daemon-reload
 systemctl restart docker
@@ -21,8 +21,9 @@ systemctl restart docker
 #=====> CONSTANTS <=====#
 PORT=7878
 POD_NAME="fusion-agent"
-DOCKER_IMAGE="ghcr.io/luminous-gsm/fusion:0.0.1-SNAPSHOT"
-MEMORY_ALLOCATION="128m"
+AGENT_VERSION="0.0.1-SNAPSHOT"
+DOCKER_IMAGE="ghcr.io/luminous-gsm/fusion:${AGENT_VERSION}"
+MEMORY_ALLOCATION="256m"
 
 #=====> VARIABLES <=====#
 paramters=("$@")
@@ -39,4 +40,12 @@ if [ "$ENV_PLATFORM" == "aws" ]; then
 fi
 
 #=====> AGENT RUN COMMAND <=====#
-docker run -d -m ${MEMORY_ALLOCATION} -v /var/run/docker.sock:/var/run/docker.sock -e ENV_NODE_NAME="${ENV_NODE_NAME}" -e ENV_NODE_UNIQUE_ID="${ENV_NODE_UNIQUE_ID}" -e ENV_NODE_DESCRIPTION="${ENV_NODE_DESCRIPTION}" -e ENV_NODE_AUTHORIZATION_TOKEN="${ENV_NODE_AUTHORIZATION_TOKEN}" -e ENV_PLATFORM="${ENV_PLATFORM}" -e ENV_NODE_HOSTNAME="${ENV_NODE_HOSTNAME}" -p ${PORT}:${PORT} --name ${POD_NAME} ${DOCKER_IMAGE}
+if [[ $(docker ps -a --filter="name=${POD_NAME}" --filter "status=exited" | grep -w "${POD_NAME}") ]]; then
+  docker start -a "${POD_NAME}"
+elif [[ $(docker ps -a --filter="name=${POD_NAME}" --filter "status=running" | grep -w "${POD_NAME}") ]]; then
+  echo "Fusion Agent running"
+else
+  docker pull "${DOCKER_IMAGE}"
+  docker create -m ${MEMORY_ALLOCATION} -v /var/run/docker.sock:/var/run/docker.sock -e ENV_NODE_NAME="${ENV_NODE_NAME}" -e ENV_NODE_UNIQUE_ID="${ENV_NODE_UNIQUE_ID}" -e ENV_NODE_DESCRIPTION="${ENV_NODE_DESCRIPTION}" -e ENV_NODE_AUTHORIZATION_TOKEN="${ENV_NODE_AUTHORIZATION_TOKEN}" -e ENV_PLATFORM="${ENV_PLATFORM}" -e ENV_NODE_HOSTNAME="${ENV_NODE_HOSTNAME}" -p ${PORT}:${PORT} --name ${POD_NAME} ${DOCKER_IMAGE}
+  docker start -a "${POD_NAME}"
+fi
