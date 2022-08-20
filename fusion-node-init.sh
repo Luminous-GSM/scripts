@@ -19,11 +19,11 @@ systemctl daemon-reload
 systemctl restart docker
 
 #=====> CONSTANTS <=====#
-PORT=7878
+PORT=8899
 POD_NAME="fusion-agent"
-AGENT_VERSION="0.0.1-SNAPSHOT"
+AGENT_VERSION="0.1"
 DOCKER_IMAGE="ghcr.io/luminous-gsm/fusion:${AGENT_VERSION}"
-MEMORY_ALLOCATION="256m"
+MEMORY_ALLOCATION="64m"
 RESTART_POLICY="always"
 
 #=====> VARIABLES <=====#
